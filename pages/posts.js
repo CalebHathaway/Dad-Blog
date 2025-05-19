@@ -3,7 +3,12 @@ import Layout from '../components/Layout';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import { db } from '../lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc
+} from 'firebase/firestore';
 
 export default function Posts() {
   const [posts, setPosts] = useState([]);
@@ -17,6 +22,13 @@ export default function Posts() {
     }
     fetchData();
   }, []);
+
+  const handleLike = async (post) => {
+    const docRef = doc(db, 'posts', post.id);
+    const newCount = (post.likes || 0) + 1;
+    await updateDoc(docRef, { likes: newCount });
+    setPosts(posts.map(p => p.id === post.id ? { ...p, likes: newCount } : p));
+  };
 
   const filtered = posts.filter(p =>
     p.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -35,12 +47,28 @@ export default function Posts() {
       />
       <section className={styles.postList}>
         {filtered.map(post => (
-          <Link key={post.id} href={`/blog/${post.slug}`} className={styles.postCard}>
-            <h2>{post.title}</h2>
-            <p className={styles.date}>{post.date}</p>
-            <p>{post.excerpt}</p>
-            <span className={styles.readMore}>Read more →</span>
-          </Link>
+          <div key={post.id} className={styles.postCard} style={{ position: 'relative' }}>
+            <button
+              onClick={() => handleLike(post)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1.2rem'
+              }}
+            >
+              ❤️ {post.likes || 0}
+            </button>
+            <Link href={`/blog/${post.slug}`} className={styles.postCard}>
+              <h2>{post.title}</h2>
+              <p className={styles.date}>{post.date}</p>
+              <p>{post.excerpt}</p>
+              <span className={styles.readMore}>Read more →</span>
+            </Link>
+          </div>
         ))}
       </section>
     </Layout>
