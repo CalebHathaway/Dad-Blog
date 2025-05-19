@@ -6,7 +6,7 @@ export default function Home() {
       <div style={{ textAlign: 'center', marginTop: '3rem' }}>
         <h1>Steve Hathaway</h1>
         <p><em>Decisions, Direction, and a Dash of Experience.</em></p>
-        <p>Welcome to the Presidential Perspective. Navigate to the Posts tab to read blog entries.</p>
+        <p>Welcome to the Presidential Perspective. Explore recent posts or learn more about Steve.</p>
       </div>
     </Layout>
   );
