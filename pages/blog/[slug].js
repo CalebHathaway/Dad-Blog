@@ -12,6 +12,8 @@ import {
 import { db } from '../../lib/firebase';
 import Layout from '../../components/Layout';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 
 export async function getServerSideProps({ params }) {
   const snap = await getDocs(collection(db, 'posts'));
@@ -75,7 +77,9 @@ export default function Post({ post }) {
               lineHeight: 1.6
             }}
           >
-            <ReactMarkdown>{post.content || ''}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+              {post.content || ''}
+            </ReactMarkdown>
           </div>
           <p style={{ marginTop: '2rem', fontStyle: 'italic' }}>— Steve Hathaway</p>
         </div>
