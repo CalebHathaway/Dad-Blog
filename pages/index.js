@@ -21,7 +21,10 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1>Presidential Perspective</h1>
+        <div className={styles.headerTop}>
+          <h1>Presidential Perspective</h1>
+          <Link href="/admin" className={styles.adminLink}>Admin</Link>
+        </div>
         <p className={styles.motto}>Decisions, Direction, and a Dash of Experience.</p>
       </header>
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { db } from '../../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import ReactMarkdown from 'react-markdown';
+import Link from 'next/link';
 import styles from '../../styles/Home.module.css';
 
 export default function BlogPost() {
@@ -30,7 +31,10 @@ export default function BlogPost() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1>{post.title}</h1>
+        <div className={styles.headerTop}>
+          <h1>{post.title}</h1>
+          <Link href="/admin" className={styles.adminLink}>Admin</Link>
+        </div>
         <p className={styles.date}>{post.date}</p>
       </header>
 
