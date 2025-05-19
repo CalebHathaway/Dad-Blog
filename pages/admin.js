@@ -1,3 +1,4 @@
+// pages/admin.js
 import { useEffect, useState } from 'react';
 import { auth, db } from '../lib/firebase';
 import {
@@ -89,8 +90,11 @@ export default function Admin() {
     if (!title || !date || !content) return;
     const slug = title.toLowerCase().replace(/\s+/g, '-');
     const data = { title, date, link, imageUrl, content, slug };
-    if (editing) await updateDoc(doc(db, 'posts', editing), data);
-    else await addDoc(collection(db, 'posts'), data);
+    if (editing) {
+      await updateDoc(doc(db, 'posts', editing), data);
+    } else {
+      await addDoc(collection(db, 'posts'), data);
+    }
     setEditing(null);
     setForm({ title: '', date: '', link: '', imageUrl: '', content: '' });
     loadPosts();
@@ -113,7 +117,7 @@ export default function Admin() {
 
   const saveProfile = async () => {
     await updateSiteSetting('profile', { url: profileURL });
-    alert('Profile picture updated');
+    alert('Profile updated');
   };
 
   const saveResume = async () => {
@@ -139,12 +143,34 @@ export default function Admin() {
           <>
             <h2>New Post</h2>
             <div className={styles.form}>
-              <input placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
-              <input placeholder="Date (YYYY-MM-DD)" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
-              <input placeholder="External Link (optional)" value={form.link} onChange={e => setForm({ ...form, link: e.target.value })} />
-              <input placeholder="Image URL (optional)" value={form.imageUrl} onChange={e => setForm({ ...form, imageUrl: e.target.value })} />
-              <textarea placeholder="Full blog content (Markdown supported)" value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} />
-              <button onClick={savePost}>{editing ? 'Update' : 'Publish'} Post</button>
+              <input
+                placeholder="Title"
+                value={form.title}
+                onChange={e => setForm({ ...form, title: e.target.value })}
+              />
+              <input
+                placeholder="Date (YYYY-MM-DD)"
+                value={form.date}
+                onChange={e => setForm({ ...form, date: e.target.value })}
+              />
+              <input
+                placeholder="External Link (optional)"
+                value={form.link}
+                onChange={e => setForm({ ...form, link: e.target.value })}
+              />
+              <input
+                placeholder="Image URL (optional)"
+                value={form.imageUrl}
+                onChange={e => setForm({ ...form, imageUrl: e.target.value })}
+              />
+              <textarea
+                placeholder="Full blog content (Markdown supported)"
+                value={form.content}
+                onChange={e => setForm({ ...form, content: e.target.value })}
+              />
+              <button onClick={savePost}>
+                {editing ? 'Update' : 'Publish'} Post
+              </button>
             </div>
             <h3>Post History</h3>
             {posts.map(p => (
@@ -157,10 +183,99 @@ export default function Admin() {
             ))}
           </>
         );
+
       case 'comments':
         return (
           <>
             <h2>Comments</h2>
             {comments.length ? comments.map(c => (
               <div key={c.id} style={{ marginBottom: '1rem' }}>
-                <strong>Post: {c.post
+                <strong>Post: {c.postSlug}</strong><br />
+                <p>{c.text}</p>
+                <small>{c.createdAt?.toDate().toLocaleString()}</small><br />
+                <button onClick={() => deleteComment(c.id)}>Delete</button>
+              </div>
+            )) : <p>No comments yet.</p>}
+          </>
+        );
+
+      case 'about':
+        return (
+          <>
+            <h2>About Page</h2>
+            <textarea
+              value={aboutText}
+              onChange={e => setAboutText(e.target.value)}
+              rows={6}
+            />
+            <button onClick={saveAbout}>Save About</button>
+          </>
+        );
+
+      case 'profile':
+        return (
+          <>
+            <h2>Profile Picture</h2>
+            <input
+              placeholder="Image URL (hosted externally)"
+              value={profileURL}
+              onChange={e => setProfileURL(e.target.value)}
+            />
+            {profileURL && (
+              <img
+                src={profileURL}
+                alt="Preview"
+                style={{ maxWidth: 150, marginTop: 10 }}
+              />
+            )}
+            <button onClick={saveProfile}>Save Profile</button>
+          </>
+        );
+
+      case 'resume':
+        return (
+          <>
+            <h2>Resume</h2>
+            <input
+              placeholder="Resume PDF URL"
+              value={resumeUrl}
+              onChange={e => setResumeUrl(e.target.value)}
+            />
+            <button onClick={saveResume}>Save Resume</button>
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Layout>
+      <div className={styles.adminWrapper}>
+        {!user ? (
+          <div style={{ padding: '2rem' }}>
+            <h2>Admin Panel</h2>
+            <p>You must be signed in to continue.</p>
+            <button onClick={handleSignIn}>Sign in with Google</button>
+          </div>
+        ) : (
+          <>
+            <div className={styles.navRow}>
+              <p>Signed in as: <strong>{user.email}</strong></p>
+              <button onClick={handleSignOut}>Sign Out</button>
+            </div>
+            <div className={styles.tabButtons}>
+              <button onClick={() => setTab('posts')}>Posts</button>
+              <button onClick={() => setTab('comments')}>Comments</button>
+              <button onClick={() => setTab('about')}>About Page</button>
+              <button onClick={() => setTab('profile')}>Profile Picture</button>
+              <button onClick={() => setTab('resume')}>Resume</button>
+            </div>
+            <div className={styles.adminContent}>{renderTabs()}</div>
+          </>
+        )}
+      </div>
+    </Layout>
+  );
+}
