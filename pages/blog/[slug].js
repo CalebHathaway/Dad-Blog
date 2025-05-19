@@ -1,16 +1,16 @@
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import Layout from '../../components/Layout';
 import ReactMarkdown from 'react-markdown';
 import styles from '../../styles/Home.module.css';
 
 export async function getServerSideProps({ params }) {
-  const ref = doc(db, 'posts', params.slug);
-  const snap = await getDoc(ref);
+  const snapshot = await getDocs(collection(db, 'posts'));
+  const match = snapshot.docs.find(doc => doc.data().slug === params.slug);
 
-  if (!snap.exists()) return { notFound: true };
+  if (!match) return { notFound: true };
 
-  return { props: { post: snap.data() } };
+  return { props: { post: match.data() } };
 }
 
 export default function Post({ post }) {
