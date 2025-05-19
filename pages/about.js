@@ -1,12 +1,23 @@
+import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
+import { getSiteSetting } from '../lib/siteSettings';
 
 export default function About() {
+  const [content, setContent] = useState('Loading...');
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = await getSiteSetting('about');
+      setContent(data?.text || 'No about info set.');
+    }
+    fetchData();
+  }, []);
+
   return (
     <Layout title="About">
       <div style={{ maxWidth: '720px', margin: '2rem auto' }}>
         <h1>About Steve Hathaway</h1>
-        <p>Steve Hathaway is a seasoned professional with a passion for leadership, strategic thinking, and making decisions that matter. This blog is his personal space to share insights, reflections, and direction for professionals looking to grow.</p>
-        <p>Whether you're a student, a leader, or simply curious, you're welcome here.</p>
+        <p>{content}</p>
       </div>
     </Layout>
   );
