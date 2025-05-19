@@ -22,7 +22,8 @@ export default function Contact() {
         />
         <div>
           <h1>Contact Steve</h1>
-          <p>Want to reach out to Steve? Send him an email at:</p>
+          <p>Whether you're reaching out for a professional connection or to discuss meaningful topics, Steve would love to hear from you.</p>
+          <p>Email him at:</p>
           <p><strong>skhathaway5@gmail.com</strong></p>
           <p>Or connect through LinkedIn or other professional networks.</p>
         </div>
