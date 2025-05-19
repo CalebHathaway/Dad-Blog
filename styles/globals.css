@@ -1,8 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* === Global Variables and Base Reset === */
+:root {
+  --primary: #1e3a8a;
+  --light: #f8f9fa;
+  --gray: #e5e7eb;
+  --text: #1f2937;
+  --accent: #3b82f6;
+}
 
-.prose {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--light);
+  color: var(--text);
 }
