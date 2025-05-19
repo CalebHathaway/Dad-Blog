@@ -10,7 +10,12 @@ import {
   setDoc,
   getDoc
 } from 'firebase/firestore';
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import {
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut
+} from 'firebase/auth';
 import styles from '../styles/Admin.module.css';
 import Layout from '../components/Layout';
 
@@ -23,13 +28,13 @@ export default function Admin() {
   const [tab, setTab] = useState('posts');
   const [aboutText, setAboutText] = useState('');
   const [profileURL, setProfileURL] = useState('');
-  const [analytics, setAnalytics] = useState({});
 
   const [form, setForm] = useState({
     title: '',
     date: '',
     summary: '',
-    content: ''
+    content: '',
+    link: ''
   });
 
   useEffect(() => {
@@ -82,7 +87,7 @@ export default function Admin() {
       await addDoc(collection(db, 'posts'), data);
     }
 
-    setForm({ title: '', date: '', summary: '', content: '' });
+    setForm({ title: '', date: '', summary: '', content: '', link: '' });
     loadPosts();
   };
 
@@ -97,7 +102,8 @@ export default function Admin() {
       title: post.title,
       date: post.date,
       summary: post.summary,
-      content: post.content
+      content: post.content,
+      link: post.link || ''
     });
   };
 
@@ -117,31 +123,38 @@ export default function Admin() {
         return (
           <>
             <h2>New Post</h2>
-            <input
-              placeholder="Title"
-              value={form.title}
-              onChange={e => setForm({ ...form, title: e.target.value })}
-            />
-            <input
-              placeholder="Date (YYYY-MM-DD)"
-              value={form.date}
-              onChange={e => setForm({ ...form, date: e.target.value })}
-            />
-            <input
-              placeholder="Short summary"
-              value={form.summary}
-              onChange={e => setForm({ ...form, summary: e.target.value })}
-            />
-            <textarea
-              placeholder="Full blog content (Markdown supported)"
-              value={form.content}
-              onChange={e => setForm({ ...form, content: e.target.value })}
-            />
-            <button onClick={savePost}>{editing ? 'Update' : 'Publish'} Post</button>
+            <div className={styles.form}>
+              <input
+                placeholder="Title"
+                value={form.title}
+                onChange={e => setForm({ ...form, title: e.target.value })}
+              />
+              <input
+                placeholder="Date (YYYY-MM-DD)"
+                value={form.date}
+                onChange={e => setForm({ ...form, date: e.target.value })}
+              />
+              <input
+                placeholder="Short summary"
+                value={form.summary}
+                onChange={e => setForm({ ...form, summary: e.target.value })}
+              />
+              <input
+                placeholder="External Link (optional)"
+                value={form.link}
+                onChange={e => setForm({ ...form, link: e.target.value })}
+              />
+              <textarea
+                placeholder="Full blog content (Markdown supported)"
+                value={form.content}
+                onChange={e => setForm({ ...form, content: e.target.value })}
+              />
+              <button onClick={savePost}>{editing ? 'Update' : 'Publish'} Post</button>
+            </div>
 
             <h3>Post History</h3>
             {posts.map(post => (
-              <div key={post.id}>
+              <div key={post.id} style={{ marginBottom: '1rem' }}>
                 <strong>{post.title}</strong> ({post.date})<br />
                 <small>/{post.slug}</small><br />
                 <button onClick={() => startEdit(post)}>Edit</button>

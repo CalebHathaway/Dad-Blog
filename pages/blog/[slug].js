@@ -1,4 +1,5 @@
-import { collection, getDocs } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
+import { collection, getDocs, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import Layout from '../../components/Layout';
 import ReactMarkdown from 'react-markdown';
@@ -14,17 +15,72 @@ export async function getServerSideProps({ params }) {
 }
 
 export default function Post({ post }) {
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+
+  useEffect(() => {
+    const q = query(
+      collection(db, 'comments'),
+      where('postSlug', '==', post.slug),
+      orderBy('createdAt', 'asc')
+    );
+    const unsubscribe = onSnapshot(q, snap => {
+      setComments(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return unsubscribe;
+  }, [post.slug]);
+
+  const submitComment = async () => {
+    if (!newComment.trim()) return;
+    await addDoc(collection(db, 'comments'), {
+      postSlug: post.slug,
+      text: newComment.trim(),
+      createdAt: serverTimestamp(),
+    });
+    setNewComment('');
+  };
+
   return (
     <Layout title={post.title}>
       <article className={styles.main}>
         <h1>{post.title}</h1>
         <p className={styles.date}>{post.date}</p>
+        {post.link && (
+          <p>
+            <a href={post.link} target="_blank" rel="noopener noreferrer">
+              Related Link
+            </a>
+          </p>
+        )}
+
         <ReactMarkdown>{post.content || ''}</ReactMarkdown>
-        <div className={styles.reactions}>
-          <button>👍</button>
-          <button>🔥</button>
-          <button>💭</button>
-        </div>
+
+        <section style={{ marginTop: '2rem' }}>
+          <h2>Comments</h2>
+          {comments.length ? (
+            comments.map(c => (
+              <div key={c.id} style={{ marginBottom: '1rem' }}>
+                <p>{c.text}</p>
+                <small style={{ color: '#555' }}>
+                  {c.createdAt?.toDate().toLocaleString()}
+                </small>
+              </div>
+            ))
+          ) : (
+            <p>No comments yet.</p>
+          )}
+
+          <textarea
+            placeholder="Add a comment..."
+            value={newComment}
+            onChange={e => setNewComment(e.target.value)}
+            rows={3}
+            style={{ width: '100%', padding: '0.5rem', marginTop: '1rem' }}
+          />
+          <button onClick={submitComment} style={{ marginTop: '0.5rem' }}>
+            Post Comment
+          </button>
+        </section>
       </article>
     </Layout>
   );
