@@ -15,13 +15,8 @@ export default function About() {
 
   return (
     <Layout title="About">
-      <div style={{ maxWidth: '720px', margin: '2rem auto' }}>
+      <div style={{ maxWidth: '720px', margin: '2rem auto', padding: '0 1rem' }}>
         <h1>About Steve Hathaway</h1>
-        <p>
-          Steve Hathaway is a thoughtful leader with a passion for sharing insight, asking good
-          questions, and helping others grow. Whether writing about faith, leadership, or life
-          lessons, he brings clarity and heart to every conversation.
-        </p>
         <p>{content}</p>
       </div>
     </Layout>
