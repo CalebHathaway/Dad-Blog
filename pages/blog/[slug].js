@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
-  collection, getDocs, query, where, orderBy,
-  onSnapshot, addDoc, serverTimestamp
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import Layout from '../../components/Layout';
@@ -34,7 +40,7 @@ export default function Post({ post }) {
     await addDoc(collection(db, 'comments'), {
       postSlug: post.slug,
       text: newComment.trim(),
-      createdAt: serverTimestamp(),
+      createdAt: serverTimestamp()
     });
     setNewComment('');
   };
@@ -50,7 +56,6 @@ export default function Post({ post }) {
           margin: '2rem 0'
         }}
       >
-        {/* Left: optional image */}
         {post.imageUrl && (
           <img
             src={post.imageUrl}
@@ -59,14 +64,9 @@ export default function Post({ post }) {
           />
         )}
 
-        {/* Center: main content */}
         <div style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: '2rem', margin: '0.5rem 0' }}>
-            {post.title}
-          </h1>
-          <p className="date" style={{ margin: '0.5rem 0' }}>
-            {post.date}
-          </p>
+          <h1 style={{ fontSize: '2rem', margin: '0.5rem 0' }}>{post.title}</h1>
+          <p className="date" style={{ margin: '0.5rem 0' }}>{post.date}</p>
           <div
             style={{
               maxWidth: '600px',
@@ -77,13 +77,10 @@ export default function Post({ post }) {
           >
             <ReactMarkdown>{post.content || ''}</ReactMarkdown>
           </div>
-          <p style={{ marginTop: '2rem', fontStyle: 'italic' }}>
-            — Steve Hathaway
-          </p>
+          <p style={{ marginTop: '2rem', fontStyle: 'italic' }}>— Steve Hathaway</p>
         </div>
 
-        {/* Right: comments sidebar */}
-        <div
+        <aside
           style={{
             borderLeft: '1px solid #e5e7eb',
             paddingLeft: '1rem',
@@ -109,20 +106,12 @@ export default function Post({ post }) {
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
             rows={3}
-            style={{
-              width: '100%',
-              marginTop: '1rem',
-              padding: '0.5rem',
-              boxSizing: 'border-box'
-            }}
+            style={{ width: '100%', marginTop: '1rem', padding: '0.5rem', boxSizing: 'border-box' }}
           />
-          <button
-            onClick={submitComment}
-            style={{ marginTop: '0.5rem', width: '100%' }}
-          >
+          <button onClick={submitComment} style={{ marginTop: '0.5rem', width: '100%' }}>
             Post Comment
           </button>
-        </div>
+        </aside>
       </div>
     </Layout>
   );
