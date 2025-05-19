@@ -16,7 +16,7 @@ function generateSlug(title) {
 export default function Admin() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [form, setForm] = useState({ title: '', date: '', excerpt: '' });
+  const [form, setForm] = useState({ title: '', date: '', excerpt: '', content: '' });
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -35,25 +35,30 @@ export default function Admin() {
   };
 
   const handleSave = async () => {
-    const { title, date, excerpt } = form;
+    const { title, date, excerpt, content } = form;
     if (!title || !date) return alert('Please fill in title and date');
 
     const slug = generateSlug(title);
 
     if (editingId) {
       const ref = doc(db, 'posts', editingId);
-      await updateDoc(ref, { title, date, excerpt, slug });
+      await updateDoc(ref, { title, date, excerpt, content, slug });
     } else {
-      await addDoc(collection(db, 'posts'), { title, date, excerpt, slug });
+      await addDoc(collection(db, 'posts'), { title, date, excerpt, content, slug });
     }
 
-    setForm({ title: '', date: '', excerpt: '' });
+    setForm({ title: '', date: '', excerpt: '', content: '' });
     setEditingId(null);
     fetchPosts();
   };
 
   const handleEdit = (post) => {
-    setForm({ title: post.title, date: post.date, excerpt: post.excerpt });
+    setForm({
+      title: post.title,
+      date: post.date,
+      excerpt: post.excerpt,
+      content: post.content || ''
+    });
     setEditingId(post.id);
   };
 
@@ -79,11 +84,12 @@ export default function Admin() {
             <button className={styles.buttonSmall} onClick={signOutUser}>Sign Out</button>
           </div>
 
-          <h2>New Post</h2>
+          <h2>{editingId ? 'Edit Post' : 'New Post'}</h2>
           <div className={styles.formGrid}>
             <input name="title" placeholder="Title" value={form.title} onChange={handleChange} />
             <input name="date" placeholder="Date (YYYY-MM-DD)" value={form.date} onChange={handleChange} />
-            <textarea name="excerpt" placeholder="Excerpt" rows={3} value={form.excerpt} onChange={handleChange} />
+            <textarea name="excerpt" placeholder="Short summary or teaser..." rows={3} value={form.excerpt} onChange={handleChange} />
+            <textarea name="content" placeholder="Full blog content (Markdown supported)" rows={10} value={form.content} onChange={handleChange} />
             <button className={styles.button} onClick={handleSave}>
               {editingId ? 'Update Post' : 'Publish Post'}
             </button>

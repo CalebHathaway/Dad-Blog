@@ -1,51 +1,31 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import Layout from '../../components/Layout';
 import ReactMarkdown from 'react-markdown';
-import Link from 'next/link';
 import styles from '../../styles/Home.module.css';
 
-export default function BlogPost() {
-  const router = useRouter();
-  const { slug } = router.query;
-  const [post, setPost] = useState(null);
+export async function getServerSideProps({ params }) {
+  const ref = doc(db, 'posts', params.slug);
+  const snap = await getDoc(ref);
 
-  useEffect(() => {
-    if (!slug) return;
+  if (!snap.exists()) return { notFound: true };
 
-    const fetchPost = async () => {
-      const snapshot = await getDocs(collection(db, 'posts'));
-      const match = snapshot.docs
-        .map(doc => doc.data())
-        .find(p => p.slug === slug);
+  return {
+    props: {
+      post: snap.data()
+    }
+  };
+}
 
-      setPost(match || null);
-    };
-
-    fetchPost();
-  }, [slug]);
-
-  if (!post) return <p style={{ padding: '2rem' }}>Loading post...</p>;
-
+export default function Post({ post }) {
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.headerTop}>
-          <h1>{post.title}</h1>
-          <Link href="/admin" className={styles.adminLink}>Admin</Link>
-        </div>
+    <Layout title={post.title}>
+      <article className={styles.main}>
+        <h1>{post.title}</h1>
         <p className={styles.date}>{post.date}</p>
-      </header>
-
-      <main className={styles.main}>
-        <ReactMarkdown>{post.content}</ReactMarkdown>
-        <div style={{ marginTop: '3rem', borderTop: '1px solid #ddd', paddingTop: '1rem' }}>
-          <img src="/profile.jpg" alt="Steve Hathaway" style={{ width: 60, borderRadius: '50%' }} />
-          <p><strong>Steve Hathaway</strong></p>
-          <p style={{ fontStyle: 'italic' }}>“Decisions, Direction, and a Dash of Experience.”</p>
-        </div>
-      </main>
-    </div>
+        <ReactMarkdown>{post.content || ''}</ReactMarkdown>
+      </article>
+    </Layout>
   );
 }
