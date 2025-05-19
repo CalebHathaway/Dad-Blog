@@ -5,10 +5,18 @@ import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from
 import Layout from '../components/Layout';
 import styles from '../styles/Home.module.css';
 
+function generateSlug(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\s+/g, '-')
+    .slice(0, 50);
+}
+
 export default function Admin() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [form, setForm] = useState({ title: '', slug: '', date: '', excerpt: '' });
+  const [form, setForm] = useState({ title: '', date: '', excerpt: '' });
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -27,22 +35,25 @@ export default function Admin() {
   };
 
   const handleSave = async () => {
-    if (!form.title || !form.slug || !form.date) return alert("Please fill all fields");
+    const { title, date, excerpt } = form;
+    if (!title || !date) return alert('Please fill in title and date');
+
+    const slug = generateSlug(title);
 
     if (editingId) {
       const ref = doc(db, 'posts', editingId);
-      await updateDoc(ref, form);
+      await updateDoc(ref, { title, date, excerpt, slug });
     } else {
-      await addDoc(collection(db, 'posts'), form);
+      await addDoc(collection(db, 'posts'), { title, date, excerpt, slug });
     }
 
-    setForm({ title: '', slug: '', date: '', excerpt: '' });
+    setForm({ title: '', date: '', excerpt: '' });
     setEditingId(null);
     fetchPosts();
   };
 
   const handleEdit = (post) => {
-    setForm(post);
+    setForm({ title: post.title, date: post.date, excerpt: post.excerpt });
     setEditingId(post.id);
   };
 
@@ -71,7 +82,6 @@ export default function Admin() {
           <h2>New Post</h2>
           <div className={styles.formGrid}>
             <input name="title" placeholder="Title" value={form.title} onChange={handleChange} />
-            <input name="slug" placeholder="Slug" value={form.slug} onChange={handleChange} />
             <input name="date" placeholder="Date (YYYY-MM-DD)" value={form.date} onChange={handleChange} />
             <textarea name="excerpt" placeholder="Excerpt" rows={3} value={form.excerpt} onChange={handleChange} />
             <button className={styles.button} onClick={handleSave}>
