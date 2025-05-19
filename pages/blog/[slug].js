@@ -1,8 +1,13 @@
+import React from 'react';
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+
 export async function getStaticPaths() {
   const files = fs.readdirSync(path.join(process.cwd(), 'blogposts'));
 
-  const paths = files.map(filename => ({
-    params: { slug: filename.replace('.md', '') }
+  const paths = files.map((filename) => ({
+    params: { slug: filename.replace('.md', '') },
   }));
 
   return {
@@ -25,4 +30,15 @@ export async function getStaticProps({ params: { slug } }) {
       content,
     },
   };
+}
+
+// ✅ THIS is the missing piece!
+export default function BlogPostPage({ frontmatter, content }) {
+  return (
+    <div>
+      <h1>{frontmatter.title}</h1>
+      <p>{frontmatter.date}</p>
+      <div>{content}</div>
+    </div>
+  );
 }
