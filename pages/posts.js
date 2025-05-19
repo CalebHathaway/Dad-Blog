@@ -4,7 +4,7 @@ import styles from '../styles/Home.module.css';
 import { db } from '../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   try {
     const snapshot = await getDocs(collection(db, 'posts'));
     const posts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
