@@ -23,7 +23,7 @@ export default function Contact() {
         <div>
           <h1>Contact Steve</h1>
           <p>Want to reach out to Steve? Send him an email at:</p>
-          <p><strong>presidentialperspective@gmail.com</strong></p>
+          <p><strong>skhathaway5@gmail.com</strong></p>
           <p>Or connect through LinkedIn or other professional networks.</p>
         </div>
       </div>
