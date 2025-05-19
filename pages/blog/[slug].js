@@ -22,10 +22,9 @@ export default function Post({ post }) {
       where('postSlug', '==', post.slug),
       orderBy('createdAt', 'asc')
     );
-    const unsubscribe = onSnapshot(q, snap => {
+    return onSnapshot(q, snap => {
       setComments(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
-    return unsubscribe;
   }, [post.slug]);
 
   const submitComment = async () => {
@@ -40,37 +39,31 @@ export default function Post({ post }) {
 
   return (
     <Layout title={post.title}>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          gap: '2rem',
-          margin: '2rem 0'
-        }}
-      >
-        {/* Optional image */}
+      <div style={{ display: 'flex', gap: '2rem', margin: '2rem 0', alignItems: 'flex-start' }}>
+        {/* Left: optional image */}
         {post.imageUrl && (
           <div style={{ flex: '0 0 200px' }}>
             <img
               src={post.imageUrl}
               alt={post.title}
-              style={{ width: '100%', borderRadius: 8 }}
+              style={{ width: '100%', borderRadius: 8, objectFit: 'cover' }}
             />
           </div>
         )}
 
-        {/* Main content */}
-        <article style={{ flex: 1, textAlign: 'center' }}>
-          <h1 style={{ marginBottom: '0.5rem' }}>{post.title}</h1>
-          <p className={styles.date} style={{ marginBottom: '1rem' }}>{post.date}</p>
-          <ReactMarkdown>{post.content || ''}</ReactMarkdown>
+        {/* Center: main content */}
+        <main style={{ flex: 1, textAlign: 'center' }}>
+          <h1 style={{ fontSize: '2rem', margin: '0.5rem 0' }}>{post.title}</h1>
+          <p className={styles.date} style={{ margin: '0.5rem 0' }}>{post.date}</p>
+          <div style={{ maxWidth: '600px', margin: '1rem auto', textAlign: 'left' }}>
+            <ReactMarkdown>{post.content || ''}</ReactMarkdown>
+          </div>
           <p style={{ marginTop: '2rem', fontStyle: 'italic' }}>— Steve Hathaway</p>
-        </article>
+        </main>
 
-        {/* Comments sidebar */}
+        {/* Right: comments sidebar */}
         <aside style={{ width: '300px', borderLeft: '1px solid #e5e7eb', paddingLeft: '1rem' }}>
-          <h2>Comments</h2>
+          <h2 style={{ marginTop: 0 }}>Comments</h2>
           <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
             {comments.length ? (
               comments.map(c => (
