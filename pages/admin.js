@@ -12,6 +12,8 @@ import {
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 
 export default function Admin() {
+  console.log("🔥 Firebase Key from Vercel:", process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
+
   const [user, setUser] = useState(null);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -25,7 +27,6 @@ export default function Admin() {
   const generateSlug = (title) =>
     title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-  // Auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -33,7 +34,6 @@ export default function Admin() {
     return () => unsubscribe();
   }, []);
 
-  // Load posts
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
       const items = snapshot.docs.map((doc) => ({
