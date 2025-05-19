@@ -3,7 +3,8 @@ title: 3 Things I Learned from Failing
 date: May 18, 2025
 ---
 
-Failure isn't fun, but it's the fastest way to grow.  
+Failure isn't fun, but it's the fastest way to grow.
+
 Here are three lessons I learned the hard way:
 
 1. Ego kills progress  
