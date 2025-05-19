@@ -24,7 +24,7 @@ export default function BlogList() {
         <ul className="space-y-6">
           {posts.map(post => (
             <li key={post.slug} className="border-b pb-3">
-              <Link href={`/blog/${post.slug}`}>
+              <Link href={`/blog/${post.slug}`} legacyBehavior>
                 <a className="text-2xl text-blue-700 hover:underline font-semibold">{post.title}</a>
               </Link>
               <p className="text-sm text-gray-500">{post.date}</p>
