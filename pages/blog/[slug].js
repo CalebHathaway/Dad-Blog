@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import Layout from '../../components/Layout';
@@ -11,11 +10,7 @@ export async function getServerSideProps({ params }) {
 
   if (!snap.exists()) return { notFound: true };
 
-  return {
-    props: {
-      post: snap.data()
-    }
-  };
+  return { props: { post: snap.data() } };
 }
 
 export default function Post({ post }) {
@@ -25,6 +20,11 @@ export default function Post({ post }) {
         <h1>{post.title}</h1>
         <p className={styles.date}>{post.date}</p>
         <ReactMarkdown>{post.content || ''}</ReactMarkdown>
+        <div className={styles.reactions}>
+          <button>👍</button>
+          <button>🔥</button>
+          <button>💭</button>
+        </div>
       </article>
     </Layout>
   );
