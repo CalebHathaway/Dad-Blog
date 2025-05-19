@@ -17,6 +17,20 @@ export default function Admin() {
   const [aboutText, setAboutText] = useState('');
   const [profileURL, setProfileURL] = useState('');
 
+  const allowedEmails = ['caleb.hathaway23@gmail.com', 'skhathaway5@gmail.com'];
+
+useEffect(() => {
+  onAuthStateChanged(auth, (u) => {
+    if (u && allowedEmails.includes(u.email)) {
+      setUser(u);
+    } else {
+      setUser(null);
+    }
+  });
+}, []);
+
+
+  // original useEffect kept for reference
   useEffect(() => {
     onAuthStateChanged(auth, (u) => setUser(u));
     fetchPosts();
