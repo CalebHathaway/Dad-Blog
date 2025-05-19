@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function Layout({ title, children }) {
   return (
@@ -23,6 +24,8 @@ export default function Layout({ title, children }) {
       <footer className={styles.footer}>
         <p>© {new Date().getFullYear()} Steve Hathaway</p>
       </footer>
+
+      <Analytics />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { db, auth } from '../lib/firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import Layout from '../components/Layout';
+import styles from '../styles/Home.module.css';
 
 export default function Admin() {
   const [user, setUser] = useState(null);
@@ -26,12 +27,15 @@ export default function Admin() {
   };
 
   const handleSave = async () => {
+    if (!form.title || !form.slug || !form.date) return alert("Please fill all fields");
+
     if (editingId) {
       const ref = doc(db, 'posts', editingId);
       await updateDoc(ref, form);
     } else {
       await addDoc(collection(db, 'posts'), form);
     }
+
     setForm({ title: '', slug: '', date: '', excerpt: '' });
     setEditingId(null);
     fetchPosts();
@@ -55,29 +59,41 @@ export default function Admin() {
       {!user ? (
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           <p>You must be signed in to access the admin panel.</p>
-          <button onClick={signIn}>Sign in with Google</button>
+          <button className={styles.button} onClick={signIn}>Sign in with Google</button>
         </div>
       ) : (
-        <div style={{ maxWidth: '700px', margin: '2rem auto' }}>
-          <p>Signed in as: {user.email} <button onClick={signOutUser}>Sign Out</button></p>
+        <div style={{ maxWidth: '800px', margin: '2rem auto' }}>
+          <div className={styles.adminHeader}>
+            <p>Signed in as: <strong>{user.email}</strong></p>
+            <button className={styles.buttonSmall} onClick={signOutUser}>Sign Out</button>
+          </div>
 
-          <h2>{editingId ? 'Edit Post' : 'New Post'}</h2>
-          <input placeholder="Title" name="title" value={form.title} onChange={handleChange} />
-          <input placeholder="Slug" name="slug" value={form.slug} onChange={handleChange} />
-          <input placeholder="Date (YYYY-MM-DD)" name="date" value={form.date} onChange={handleChange} />
-          <textarea placeholder="Excerpt" name="excerpt" value={form.excerpt} onChange={handleChange} />
-          <button onClick={handleSave}>{editingId ? 'Update' : 'Publish'}</button>
+          <h2>New Post</h2>
+          <div className={styles.formGrid}>
+            <input name="title" placeholder="Title" value={form.title} onChange={handleChange} />
+            <input name="slug" placeholder="Slug" value={form.slug} onChange={handleChange} />
+            <input name="date" placeholder="Date (YYYY-MM-DD)" value={form.date} onChange={handleChange} />
+            <textarea name="excerpt" placeholder="Excerpt" rows={3} value={form.excerpt} onChange={handleChange} />
+            <button className={styles.button} onClick={handleSave}>
+              {editingId ? 'Update Post' : 'Publish Post'}
+            </button>
+          </div>
 
-          <h3 style={{ marginTop: '2rem' }}>Post History</h3>
-          {posts.map((post) => (
-            <div key={post.id} style={{ borderBottom: '1px solid #ccc', padding: '1rem 0' }}>
-              <strong>{post.title}</strong> <em>({post.date})</em>
-              <div>
-                <button onClick={() => handleEdit(post)}>Edit</button>
-                <button onClick={() => handleDelete(post.id)}>Delete</button>
+          <h3 style={{ marginTop: '3rem' }}>Post History</h3>
+          <div className={styles.historyList}>
+            {posts.map((post) => (
+              <div key={post.id} className={styles.postRow}>
+                <div>
+                  <strong>{post.title}</strong> <span className={styles.date}>({post.date})</span>
+                  <div className={styles.slug}>/{post.slug}</div>
+                </div>
+                <div>
+                  <button onClick={() => handleEdit(post)} className={styles.buttonSmall}>Edit</button>
+                  <button onClick={() => handleDelete(post.id)} className={styles.buttonSmallDanger}>Delete</button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </Layout>
