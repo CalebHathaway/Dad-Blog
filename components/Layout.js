@@ -14,7 +14,7 @@ export default function Layout({ title, children }) {
       </Head>
 
       <header className={styles.header}>
-        <div className={styles.logo}>A Life Obvserved</div>
+        <div className={styles.logo}>A Life Observed</div>
         <nav className={styles.nav}>
           <Link href="/">Home</Link>
           <Link href="/posts">Posts</Link>

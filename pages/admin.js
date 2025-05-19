@@ -123,10 +123,10 @@ export default function Admin() {
           <h2>Posts</h2>
           <div className={styles.form}>
             <input placeholder="Title" value={postForm.title} onChange={e => setPostForm({ ...postForm, title: e.target.value })} />
-            <input placeholder="Date (YYYY-MM-DD)" value={postForm.date} onChange={e => setPostForm({ ...postForm, date: e.target.value })} />
+            <input placeholder="Date (DD-MM-YYYY)" value={postForm.date} onChange={e => setPostForm({ ...postForm, date: e.target.value })} />
             <input placeholder="External Link" value={postForm.link} onChange={e => setPostForm({ ...postForm, link: e.target.value })} />
             <input placeholder="Image URL" value={postForm.imageUrl} onChange={e => setPostForm({ ...postForm, imageUrl: e.target.value })} />
-            <textarea placeholder="Content (Markdown)" value={postForm.content} onChange={e => setPostForm({ ...postForm, content: e.target.value })} rows={6} />
+            <textarea placeholder="Content" value={postForm.content} onChange={e => setPostForm({ ...postForm, content: e.target.value })} rows={6} />
             <button onClick={savePost}>{editing ? 'Update' : 'Publish'} Post</button>
           </div>
           <h3>Existing Posts</h3>
