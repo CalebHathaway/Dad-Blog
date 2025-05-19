@@ -16,6 +16,7 @@ import {
   GoogleAuthProvider,
   signOut
 } from 'firebase/auth';
+import { getSiteSetting, updateSiteSetting } from '../lib/siteSettings';
 import styles from '../styles/Admin.module.css';
 import Layout from '../components/Layout';
 
@@ -29,12 +30,14 @@ export default function Admin() {
   const [tab, setTab] = useState('posts');
   const [aboutText, setAboutText] = useState('');
   const [profileURL, setProfileURL] = useState('');
+  const [resumeUrl, setResumeUrl] = useState('');
 
   const [form, setForm] = useState({
     title: '',
     date: '',
-    content: '',
-    link: ''
+    link: '',
+    imageUrl: '',
+    content: ''
   });
 
   useEffect(() => {
@@ -42,8 +45,10 @@ export default function Admin() {
       if (u && allowedEmails.includes(u.email)) {
         setUser(u);
         loadPosts();
+        loadComments();
         loadAbout();
         loadProfile();
+        loadResume();
       } else {
         setUser(null);
       }
@@ -51,27 +56,14 @@ export default function Admin() {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (tab === 'comments') {
-      loadComments();
-    }
-  }, [tab]);
-
   const loadPosts = async () => {
-    const snapshot = await getDocs(collection(db, 'posts'));
-    const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-    setPosts(data);
+    const snap = await getDocs(collection(db, 'posts'));
+    setPosts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   };
 
   const loadComments = async () => {
-    const snapshot = await getDocs(collection(db, 'comments'));
-    const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-    setComments(data);
-  };
-
-  const deleteComment = async (id) => {
-    await deleteDoc(doc(db, 'comments', id));
-    loadComments();
+    const snap = await getDocs(collection(db, 'comments'));
+    setComments(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   };
 
   const loadAbout = async () => {
@@ -84,20 +76,23 @@ export default function Admin() {
     if (snap.exists()) setProfileURL(snap.data().url);
   };
 
+  const loadResume = async () => {
+    const data = await getSiteSetting('resume');
+    setResumeUrl(data?.url || '');
+  };
+
   const handleSignIn = () => signInWithPopup(auth, new GoogleAuthProvider());
   const handleSignOut = () => signOut(auth);
 
   const savePost = async () => {
-    if (!form.title || !form.date || !form.content) return;
-    const slug = form.title.toLowerCase().replace(/\s+/g, '-');
-    const data = { ...form, slug };
-    if (editing) {
-      await updateDoc(doc(db, 'posts', editing), data);
-      setEditing(null);
-    } else {
-      await addDoc(collection(db, 'posts'), data);
-    }
-    setForm({ title: '', date: '', content: '', link: '' });
+    const { title, date, link, imageUrl, content } = form;
+    if (!title || !date || !content) return;
+    const slug = title.toLowerCase().replace(/\s+/g, '-');
+    const data = { title, date, link, imageUrl, content, slug };
+    if (editing) await updateDoc(doc(db, 'posts', editing), data);
+    else await addDoc(collection(db, 'posts'), data);
+    setEditing(null);
+    setForm({ title: '', date: '', link: '', imageUrl: '', content: '' });
     loadPosts();
   };
 
@@ -106,24 +101,35 @@ export default function Admin() {
     loadPosts();
   };
 
+  const deleteComment = async (id) => {
+    await deleteDoc(doc(db, 'comments', id));
+    loadComments();
+  };
+
+  const saveAbout = async () => {
+    await updateSiteSetting('about', { text: aboutText });
+    alert('About updated');
+  };
+
+  const saveProfile = async () => {
+    await updateSiteSetting('profile', { url: profileURL });
+    alert('Profile picture updated');
+  };
+
+  const saveResume = async () => {
+    await updateSiteSetting('resume', { url: resumeUrl });
+    alert('Resume updated');
+  };
+
   const startEdit = (post) => {
     setEditing(post.id);
     setForm({
       title: post.title,
       date: post.date,
-      content: post.content,
-      link: post.link || ''
+      link: post.link || '',
+      imageUrl: post.imageUrl || '',
+      content: post.content
     });
-  };
-
-  const saveAbout = async () => {
-    await setDoc(doc(db, 'site', 'about'), { text: aboutText });
-    alert('About updated');
-  };
-
-  const saveProfile = async () => {
-    await setDoc(doc(db, 'site', 'profile'), { url: profileURL });
-    alert('Profile picture updated');
   };
 
   const renderTabs = () => {
@@ -133,124 +139,28 @@ export default function Admin() {
           <>
             <h2>New Post</h2>
             <div className={styles.form}>
-              <input
-                placeholder="Title"
-                value={form.title}
-                onChange={e => setForm({ ...form, title: e.target.value })}
-              />
-              <input
-                placeholder="Date (YYYY-MM-DD)"
-                value={form.date}
-                onChange={e => setForm({ ...form, date: e.target.value })}
-              />
-              <input
-                placeholder="External Link (optional)"
-                value={form.link}
-                onChange={e => setForm({ ...form, link: e.target.value })}
-              />
-              <textarea
-                placeholder="Full blog content (Markdown supported)"
-                value={form.content}
-                onChange={e => setForm({ ...form, content: e.target.value })}
-              />
+              <input placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+              <input placeholder="Date (YYYY-MM-DD)" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+              <input placeholder="External Link (optional)" value={form.link} onChange={e => setForm({ ...form, link: e.target.value })} />
+              <input placeholder="Image URL (optional)" value={form.imageUrl} onChange={e => setForm({ ...form, imageUrl: e.target.value })} />
+              <textarea placeholder="Full blog content (Markdown supported)" value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} />
               <button onClick={savePost}>{editing ? 'Update' : 'Publish'} Post</button>
             </div>
-
             <h3>Post History</h3>
-            {posts.map(post => (
-              <div key={post.id} style={{ marginBottom: '1rem' }}>
-                <strong>{post.title}</strong> ({post.date})<br />
-                <small>/{post.slug}</small><br />
-                <button onClick={() => startEdit(post)}>Edit</button>
-                <button onClick={() => deletePost(post.id)}>Delete</button>
+            {posts.map(p => (
+              <div key={p.id} style={{ marginBottom: '1rem' }}>
+                <strong>{p.title}</strong> ({p.date})<br />
+                <small>/{p.slug}</small><br />
+                <button onClick={() => startEdit(p)}>Edit</button>
+                <button onClick={() => deletePost(p.id)}>Delete</button>
               </div>
             ))}
           </>
         );
-
       case 'comments':
         return (
           <>
             <h2>Comments</h2>
             {comments.length ? comments.map(c => (
               <div key={c.id} style={{ marginBottom: '1rem' }}>
-                <strong>Post: {c.postSlug}</strong><br />
-                <p>{c.text}</p>
-                <small style={{ color: '#555' }}>
-                  {c.createdAt?.toDate().toLocaleString()}
-                </small><br />
-                <button onClick={() => deleteComment(c.id)}>Delete</button>
-              </div>
-            )) : <p>No comments yet.</p>}
-          </>
-        );
-
-      case 'about':
-        return (
-          <>
-            <h2>About Page</h2>
-            <textarea
-              value={aboutText}
-              onChange={e => setAboutText(e.target.value)}
-              rows={6}
-            />
-            <button onClick={saveAbout}>Save About</button>
-          </>
-        );
-
-      case 'profile':
-        return (
-          <>
-            <h2>Profile Picture</h2>
-            <input
-                placeholder="Image URL (hosted externally)"
-                value={profileURL}
-                onChange={e => setProfileURL(e.target.value)}
-            />
-            {profileURL && <img src={profileURL} alt="Preview" style={{ maxWidth: 150, marginTop: 10 }} />}
-            <button onClick={saveProfile}>Save Profile Picture</button>
-          </>
-        );
-
-      case 'analytics':
-        return (
-          <>
-            <h2>Analytics</h2>
-            <p>Vercel Analytics automatically tracks visitors.</p>
-            <p>For live views and advanced metrics, log into your Vercel dashboard.</p>
-          </>
-        );
-    }
-  };
-
-  return (
-    <Layout>
-      <div className={styles.adminWrapper}>
-        {!user ? (
-          <div style={{ padding: '2rem' }}>
-            <h2>Admin Panel</h2>
-            <p>You must be signed in to continue.</p>
-            <button onClick={handleSignIn}>Sign in with Google</button>
-          </div>
-        ) : (
-          <>
-            <div className={styles.navRow}>
-              <p>Signed in as: <strong>{user.email}</strong></p>
-              <button onClick={handleSignOut}>Sign Out</button>
-            </div>
-            <div className={styles.tabButtons}>
-              <button onClick={() => setTab('posts')}>Posts</button>
-              <button onClick={() => setTab('comments')}>Comments</button>
-              <button onClick={() => setTab('about')}>About Page</button>
-              <button onClick={() => setTab('profile')}>Profile Picture</button>
-              <button onClick={() => setTab('analytics')}>Analytics</button>
-            </div>
-            <div className={styles.adminContent}>
-              {renderTabs()}
-            </div>
-          </>
-        )}
-      </div>
-    </Layout>
-  );
-}
+                <strong>Post: {c.post
