@@ -20,6 +20,7 @@ export default function Layout({ title, children }) {
           <Link href="/posts">Posts</Link>
           <Link href="/about">About</Link>
           <Link href="/contact">Contact</Link>
+          <Link href="/resume">Resume</Link>
           <Link href="/admin">Admin</Link>
         </nav>
       </header>
