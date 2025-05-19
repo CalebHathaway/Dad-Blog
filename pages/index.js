@@ -1,17 +1,19 @@
-export default function BlogList() {
+import Link from 'next/link';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+
+export default function Home() {
   return (
-    <main className="max-w-3xl mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">Blog Posts</h1>
-      <ul className="space-y-4">
-        <li className="border-b pb-2">
-          <a className="text-xl text-blue-600 hover:underline" href="#">Post Title #1</a>
-          <p className="text-sm text-gray-500">May 18, 2025</p>
-        </li>
-        <li className="border-b pb-2">
-          <a className="text-xl text-blue-600 hover:underline" href="#">Post Title #2</a>
-          <p className="text-sm text-gray-500">May 17, 2025</p>
-        </li>
-      </ul>
-    </main>
+    <>
+      <Header />
+      <main className="max-w-3xl mx-auto p-8">
+        <h2 className="text-2xl font-semibold mb-4">Welcome to the Blog</h2>
+        <p className="mb-6 text-gray-700">This is your go-to spot for insights on business, personal growth, and the occasional dad joke. Updated regularly.</p>
+        <Link href="/blog">
+          <a className="text-blue-600 hover:underline text-lg">Explore Blog Posts →</a>
+        </Link>
+      </main>
+      <Footer />
+    </>
   );
 }
