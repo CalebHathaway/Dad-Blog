@@ -8,6 +8,7 @@ export default function Layout({ title, children }) {
     <div className={styles.pageWrapper}>
       <Head>
         <title>{title ? `${title} - Presidential Perspective` : 'Presidential Perspective'}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Insights and direction from Steve Hathaway" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
