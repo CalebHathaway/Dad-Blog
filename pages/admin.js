@@ -1,5 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../styles/Home.module.css';
+import { db } from '../lib/firebase';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  onSnapshot
+} from 'firebase/firestore';
 
 export default function Admin() {
   const [title, setTitle] = useState('');
@@ -8,9 +17,20 @@ export default function Admin() {
   const [quote, setQuote] = useState('“Decisions, Direction, and a Dash of Experience.”');
   const [name, setName] = useState('Steve Hathaway');
   const [preview, setPreview] = useState(null);
+  const [posts, setPosts] = useState([]);
 
   const generateSlug = (title) =>
     title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
+      const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const sorted = items.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setPosts(sorted);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handlePreview = () => {
     setPreview({
@@ -30,14 +50,25 @@ export default function Admin() {
       content
     };
 
-    const res = await fetch('/api/save-post', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newPost)
-    });
+    try {
+      await addDoc(collection(db, 'posts'), newPost);
+      alert('Post saved to Firebase');
+      setTitle('');
+      setDate('');
+      setContent('');
+      setPreview(null);
+    } catch (err) {
+      alert('Error saving post: ' + err.message);
+    }
+  };
 
-    const result = await res.json();
-    alert(result.message);
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'posts', id));
+      alert('Post deleted');
+    } catch (err) {
+      alert('Error deleting post: ' + err.message);
+    }
   };
 
   return (
@@ -78,6 +109,16 @@ export default function Admin() {
             <p><strong>Slug:</strong> {preview.slug}</p>
           </div>
         )}
+
+        <h2 style={{ marginTop: '3rem' }}>Existing Posts</h2>
+        {posts.map((post) => (
+          <div key={post.id} className={styles.postPreview}>
+            <h2>{post.title}</h2>
+            <p className={styles.date}>{post.date}</p>
+            <p>{post.excerpt}</p>
+            <button onClick={() => handleDelete(post.id)}>Delete</button>
+          </div>
+        ))}
 
         <h2 style={{ marginTop: '3rem' }}>Author Info</h2>
         <input

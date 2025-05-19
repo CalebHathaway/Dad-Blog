@@ -1,8 +1,23 @@
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
-import posts from '../data/posts.json';
+import { db } from '../lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const snapshot = await getDocs(collection(db, 'posts'));
+      const fetchedPosts = snapshot.docs.map(doc => doc.data());
+      const sorted = fetchedPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setPosts(sorted);
+    };
+
+    fetchPosts();
+  }, []);
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>

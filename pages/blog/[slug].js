@@ -1,15 +1,31 @@
 import { useRouter } from 'next/router';
-import posts from '../../data/posts.json';
+import { useEffect, useState } from 'react';
+import { db } from '../../lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 import ReactMarkdown from 'react-markdown';
 import styles from '../../styles/Home.module.css';
 
 export default function BlogPost() {
   const router = useRouter();
   const { slug } = router.query;
+  const [post, setPost] = useState(null);
 
-  const post = posts.find((p) => p.slug === slug);
+  useEffect(() => {
+    if (!slug) return;
 
-  if (!post) return <p style={{ padding: '2rem' }}>Post not found.</p>;
+    const fetchPost = async () => {
+      const snapshot = await getDocs(collection(db, 'posts'));
+      const match = snapshot.docs
+        .map(doc => doc.data())
+        .find(p => p.slug === slug);
+
+      setPost(match || null);
+    };
+
+    fetchPost();
+  }, [slug]);
+
+  if (!post) return <p style={{ padding: '2rem' }}>Loading post...</p>;
 
   return (
     <div className={styles.container}>
