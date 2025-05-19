@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/Home.module.css';
-import { db } from '../lib/firebase';
+import { db, auth, provider } from '../lib/firebase';
 import {
   collection,
   addDoc,
-  getDocs,
   deleteDoc,
   doc,
-  onSnapshot
+  onSnapshot,
+  updateDoc
 } from 'firebase/firestore';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 
 export default function Admin() {
+  const [user, setUser] = useState(null);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [content, setContent] = useState('');
@@ -18,17 +20,29 @@ export default function Admin() {
   const [name, setName] = useState('Steve Hathaway');
   const [preview, setPreview] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [editingPostId, setEditingPostId] = useState(null);
 
   const generateSlug = (title) =>
     title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
+  // Auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Load posts
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'posts'), (snapshot) => {
-      const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const items = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       const sorted = items.sort((a, b) => new Date(b.date) - new Date(a.date));
       setPosts(sorted);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -51,8 +65,15 @@ export default function Admin() {
     };
 
     try {
-      await addDoc(collection(db, 'posts'), newPost);
-      alert('Post saved to Firebase');
+      if (editingPostId) {
+        await updateDoc(doc(db, 'posts', editingPostId), newPost);
+        alert('Post updated');
+        setEditingPostId(null);
+      } else {
+        await addDoc(collection(db, 'posts'), newPost);
+        alert('Post saved to Firebase');
+      }
+
       setTitle('');
       setDate('');
       setContent('');
@@ -63,6 +84,9 @@ export default function Admin() {
   };
 
   const handleDelete = async (id) => {
+    const confirm = window.confirm('Delete this post? This cannot be undone.');
+    if (!confirm) return;
+
     try {
       await deleteDoc(doc(db, 'posts', id));
       alert('Post deleted');
@@ -71,12 +95,42 @@ export default function Admin() {
     }
   };
 
+  const handleEdit = (post) => {
+    setTitle(post.title);
+    setDate(post.date);
+    setContent(post.content);
+    setEditingPostId(post.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSignIn = () => {
+    signInWithPopup(auth, provider).catch((err) =>
+      alert('Sign-in error: ' + err.message)
+    );
+  };
+
+  const handleSignOut = () => {
+    signOut(auth);
+  };
+
+  if (!user) {
+    return (
+      <div className={styles.container}>
+        <h1>Admin Panel</h1>
+        <p>You must be signed in to access this page.</p>
+        <button onClick={handleSignIn}>Sign in with Google</button>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <h1>Admin Panel</h1>
+      <p>Signed in as {user.email}</p>
+      <button onClick={handleSignOut}>Sign Out</button>
 
       <div className={styles.main}>
-        <h2>New Post</h2>
+        <h2>{editingPostId ? 'Edit Post' : 'New Post'}</h2>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -98,7 +152,9 @@ export default function Admin() {
         />
         <div style={{ marginTop: '1rem' }}>
           <button onClick={handlePreview}>Preview</button>
-          <button onClick={handleSave} style={{ marginLeft: '1rem' }}>Save Post</button>
+          <button onClick={handleSave} style={{ marginLeft: '1rem' }}>
+            {editingPostId ? 'Update Post' : 'Save Post'}
+          </button>
         </div>
 
         {preview && (
@@ -110,12 +166,16 @@ export default function Admin() {
           </div>
         )}
 
-        <h2 style={{ marginTop: '3rem' }}>Existing Posts</h2>
+        <h2 style={{ marginTop: '3rem' }}>Post History</h2>
+        {posts.length === 0 && <p>No posts yet.</p>}
         {posts.map((post) => (
           <div key={post.id} className={styles.postPreview}>
             <h2>{post.title}</h2>
             <p className={styles.date}>{post.date}</p>
             <p>{post.excerpt}</p>
+            <button onClick={() => handleEdit(post)} style={{ marginRight: '0.5rem' }}>
+              Edit
+            </button>
             <button onClick={() => handleDelete(post.id)}>Delete</button>
           </div>
         ))}
