@@ -4,7 +4,8 @@ import path from 'path';
 import matter from 'gray-matter';
 
 export async function getStaticPaths() {
-  const files = fs.readdirSync(path.join(process.cwd(), 'blogposts'));
+  const files = fs.readdirSync(path.join(process.cwd(), 'blogposts')).filter(file => file.endsWith('.md'));
+
 
   const paths = files.map((filename) => ({
     params: { slug: filename.replace('.md', '') },
