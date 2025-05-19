@@ -32,7 +32,6 @@ export default function Admin() {
   const [form, setForm] = useState({
     title: '',
     date: '',
-    summary: '',
     content: '',
     link: ''
   });
@@ -67,16 +66,11 @@ export default function Admin() {
     if (snap.exists()) setProfileURL(snap.data().url);
   };
 
-  const handleSignIn = () => {
-    signInWithPopup(auth, new GoogleAuthProvider());
-  };
-
-  const handleSignOut = () => {
-    signOut(auth);
-  };
+  const handleSignIn = () => signInWithPopup(auth, new GoogleAuthProvider());
+  const handleSignOut = () => signOut(auth);
 
   const savePost = async () => {
-    if (!form.title || !form.date || !form.summary || !form.content) return;
+    if (!form.title || !form.date || !form.content) return;
     const slug = form.title.toLowerCase().replace(/\s+/g, '-');
     const data = { ...form, slug };
 
@@ -87,7 +81,7 @@ export default function Admin() {
       await addDoc(collection(db, 'posts'), data);
     }
 
-    setForm({ title: '', date: '', summary: '', content: '', link: '' });
+    setForm({ title: '', date: '', content: '', link: '' });
     loadPosts();
   };
 
@@ -101,7 +95,6 @@ export default function Admin() {
     setForm({
       title: post.title,
       date: post.date,
-      summary: post.summary,
       content: post.content,
       link: post.link || ''
     });
@@ -133,11 +126,6 @@ export default function Admin() {
                 placeholder="Date (YYYY-MM-DD)"
                 value={form.date}
                 onChange={e => setForm({ ...form, date: e.target.value })}
-              />
-              <input
-                placeholder="Short summary"
-                value={form.summary}
-                onChange={e => setForm({ ...form, summary: e.target.value })}
               />
               <input
                 placeholder="External Link (optional)"
@@ -217,14 +205,12 @@ export default function Admin() {
               <p>Signed in as: <strong>{user.email}</strong></p>
               <button onClick={handleSignOut}>Sign Out</button>
             </div>
-
             <div className={styles.tabButtons}>
               <button onClick={() => setTab('posts')}>Posts</button>
               <button onClick={() => setTab('about')}>About Page</button>
               <button onClick={() => setTab('profile')}>Profile Picture</button>
               <button onClick={() => setTab('analytics')}>Analytics</button>
             </div>
-
             <div className={styles.adminContent}>
               {renderTabs()}
             </div>
