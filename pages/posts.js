@@ -1,4 +1,4 @@
-import Head from 'next/head';
+import Layout from '../components/Layout';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import { db } from '../lib/firebase';
@@ -18,41 +18,21 @@ export async function getStaticProps() {
 
 export default function Posts({ posts }) {
   return (
-    <div className={styles.pageWrapper}>
-      <Head>
-        <title>Posts - Presidential Perspective</title>
-      </Head>
-
-      <header className={styles.header}>
-        <div className={styles.logo}>Presidential Perspective</div>
-        <nav className={styles.nav}>
-          <Link href="/">Home</Link>
-          <Link href="/posts">Posts</Link>
-          <Link href="/admin">Admin</Link>
-        </nav>
-      </header>
-
-      <main className={styles.main}>
-        <h1>All Posts</h1>
-
-        <section className={styles.postList}>
-          {posts.length === 0 ? (
-            <p>No blog posts found.</p>
-          ) : (
-            posts.map((post) => (
-              <Link key={post.id} href={`/blog/${post.slug}`} className={styles.postCard}>
-                <h2>{post.title}</h2>
-                <p className={styles.date}>{post.date}</p>
-                <p>{post.excerpt}</p>
-              </Link>
-            ))
-          )}
-        </section>
-      </main>
-
-      <footer className={styles.footer}>
-        <p>© {new Date().getFullYear()} Steve Hathaway</p>
-      </footer>
-    </div>
+    <Layout title="Posts">
+      <h1>All Posts</h1>
+      <section className={styles.postList}>
+        {posts.length === 0 ? (
+          <p>No blog posts found.</p>
+        ) : (
+          posts.map((post) => (
+            <Link key={post.id} href={`/blog/${post.slug}`} className={styles.postCard}>
+              <h2>{post.title}</h2>
+              <p className={styles.date}>{post.date}</p>
+              <p>{post.excerpt}</p>
+            </Link>
+          ))
+        )}
+      </section>
+    </Layout>
   );
 }
