@@ -37,8 +37,8 @@
   background: #1d3470;
 }
 
-input,
-textarea {
+.adminWrapper input,
+.adminWrapper textarea {
   width: 100%;
   padding: 0.75rem;
   margin-bottom: 1rem;
@@ -47,7 +47,12 @@ textarea {
   border-radius: 4px;
 }
 
-button {
+.adminWrapper textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.adminWrapper button {
   background: #2e4a94;
   color: white;
   border: none;
@@ -58,7 +63,7 @@ button {
   transition: background 0.2s ease;
 }
 
-button:hover {
+.adminWrapper button:hover {
   background: #1d3470;
 }
 
@@ -75,28 +80,23 @@ button:hover {
   line-height: 1.5;
 }
 
-h2 {
+.adminWrapper h2 {
   margin-bottom: 1rem;
   font-size: 1.5rem;
 }
 
-h3 {
+.adminWrapper h3 {
   margin-top: 2rem;
   margin-bottom: 0.75rem;
   font-size: 1.25rem;
 }
 
-strong {
+.adminWrapper strong {
   font-weight: 600;
 }
 
-small {
+.adminWrapper small {
   color: #555;
   display: block;
   margin-bottom: 0.5rem;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 120px;
 }
