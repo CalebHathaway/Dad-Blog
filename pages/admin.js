@@ -24,6 +24,7 @@ const allowedEmails = ['caleb.hathaway23@gmail.com', 'skhathaway5@gmail.com'];
 export default function Admin() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [comments, setComments] = useState([]);
   const [editing, setEditing] = useState(null);
   const [tab, setTab] = useState('posts');
   const [aboutText, setAboutText] = useState('');
@@ -50,10 +51,27 @@ export default function Admin() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (tab === 'comments') {
+      loadComments();
+    }
+  }, [tab]);
+
   const loadPosts = async () => {
     const snapshot = await getDocs(collection(db, 'posts'));
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     setPosts(data);
+  };
+
+  const loadComments = async () => {
+    const snapshot = await getDocs(collection(db, 'comments'));
+    const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    setComments(data);
+  };
+
+  const deleteComment = async (id) => {
+    await deleteDoc(doc(db, 'comments', id));
+    loadComments();
   };
 
   const loadAbout = async () => {
@@ -73,14 +91,12 @@ export default function Admin() {
     if (!form.title || !form.date || !form.content) return;
     const slug = form.title.toLowerCase().replace(/\s+/g, '-');
     const data = { ...form, slug };
-
     if (editing) {
       await updateDoc(doc(db, 'posts', editing), data);
       setEditing(null);
     } else {
       await addDoc(collection(db, 'posts'), data);
     }
-
     setForm({ title: '', date: '', content: '', link: '' });
     loadPosts();
   };
@@ -152,6 +168,23 @@ export default function Admin() {
           </>
         );
 
+      case 'comments':
+        return (
+          <>
+            <h2>Comments</h2>
+            {comments.length ? comments.map(c => (
+              <div key={c.id} style={{ marginBottom: '1rem' }}>
+                <strong>Post: {c.postSlug}</strong><br />
+                <p>{c.text}</p>
+                <small style={{ color: '#555' }}>
+                  {c.createdAt?.toDate().toLocaleString()}
+                </small><br />
+                <button onClick={() => deleteComment(c.id)}>Delete</button>
+              </div>
+            )) : <p>No comments yet.</p>}
+          </>
+        );
+
       case 'about':
         return (
           <>
@@ -170,9 +203,9 @@ export default function Admin() {
           <>
             <h2>Profile Picture</h2>
             <input
-              placeholder="Image URL (hosted externally)"
-              value={profileURL}
-              onChange={e => setProfileURL(e.target.value)}
+                placeholder="Image URL (hosted externally)"
+                value={profileURL}
+                onChange={e => setProfileURL(e.target.value)}
             />
             {profileURL && <img src={profileURL} alt="Preview" style={{ maxWidth: 150, marginTop: 10 }} />}
             <button onClick={saveProfile}>Save Profile Picture</button>
@@ -207,6 +240,7 @@ export default function Admin() {
             </div>
             <div className={styles.tabButtons}>
               <button onClick={() => setTab('posts')}>Posts</button>
+              <button onClick={() => setTab('comments')}>Comments</button>
               <button onClick={() => setTab('about')}>About Page</button>
               <button onClick={() => setTab('profile')}>Profile Picture</button>
               <button onClick={() => setTab('analytics')}>Analytics</button>

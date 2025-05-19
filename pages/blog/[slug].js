@@ -42,46 +42,50 @@ export default function Post({ post }) {
 
   return (
     <Layout title={post.title}>
-      <article className={styles.main}>
-        <h1>{post.title}</h1>
-        <p className={styles.date}>{post.date}</p>
-        {post.link && (
-          <p>
-            <a href={post.link} target="_blank" rel="noopener noreferrer">
-              Related Link
-            </a>
-          </p>
-        )}
-
-        <ReactMarkdown>{post.content || ''}</ReactMarkdown>
-
-        <section style={{ marginTop: '2rem' }}>
-          <h2>Comments</h2>
-          {comments.length ? (
-            comments.map(c => (
-              <div key={c.id} style={{ marginBottom: '1rem' }}>
-                <p>{c.text}</p>
-                <small style={{ color: '#555' }}>
-                  {c.createdAt?.toDate().toLocaleString()}
-                </small>
-              </div>
-            ))
-          ) : (
-            <p>No comments yet.</p>
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+        {/* Main content area */}
+        <article className={styles.main} style={{ flex: 1 }}>
+          <h1>{post.title}</h1>
+          <p className={styles.date}>{post.date}</p>
+          {post.link && (
+            <p>
+              <a href={post.link} target="_blank" rel="noopener noreferrer">
+                Related Link
+              </a>
+            </p>
           )}
+          <ReactMarkdown>{post.content || ''}</ReactMarkdown>
+        </article>
 
+        {/* Sidebar comments area */}
+        <aside style={{ width: '300px', borderLeft: '1px solid #e5e7eb', paddingLeft: '1rem' }}>
+          <h2>Comments</h2>
+          <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+            {comments.length ? (
+              comments.map(c => (
+                <div key={c.id} style={{ marginBottom: '1rem' }}>
+                  <p style={{ margin: 0 }}>{c.text}</p>
+                  <small style={{ color: '#555' }}>
+                    {c.createdAt?.toDate().toLocaleString()}
+                  </small>
+                </div>
+              ))
+            ) : (
+              <p>No comments yet.</p>
+            )}
+          </div>
           <textarea
             placeholder="Add a comment..."
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
             rows={3}
-            style={{ width: '100%', padding: '0.5rem', marginTop: '1rem' }}
+            style={{ width: '100%', marginTop: '1rem', padding: '0.5rem' }}
           />
           <button onClick={submitComment} style={{ marginTop: '0.5rem' }}>
             Post Comment
           </button>
-        </section>
-      </article>
+        </aside>
+      </div>
     </Layout>
   );
 }
