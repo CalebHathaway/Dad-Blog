@@ -1,0 +1,39 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Georgia', serif;
+  color: #222;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.motto {
+  font-style: italic;
+  color: #666;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.postPreview {
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: box-shadow 0.2s;
+}
+
+.postPreview:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #888;
+}

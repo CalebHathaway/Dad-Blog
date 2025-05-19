@@ -1,19 +1,24 @@
 import Link from 'next/link';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import styles from '../styles/Home.module.css';
+import posts from '../data/posts.json';
 
 export default function Home() {
   return (
-    <>
-      <Header />
-      <main className="max-w-3xl mx-auto p-8">
-        <h2 className="text-2xl font-semibold mb-4">Welcome to the Blog</h2>
-        <p className="mb-6 text-gray-700">This is your go-to spot for insights on business, personal growth, and the occasional dad joke. Updated regularly.</p>
-        <Link href="/blog" legacyBehavior>
-          <a className="text-blue-600 hover:underline text-lg">Explore Blog Posts →</a>
-        </Link>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1>Presidential Perspective</h1>
+        <p className={styles.motto}>Decisions, Direction, and a Dash of Experience.</p>
+      </header>
+
+      <main className={styles.main}>
+        {posts.map(post => (
+          <div key={post.slug} className={styles.postPreview}>
+            <h2><Link href={`/blog/${post.slug}`}>{post.title}</Link></h2>
+            <p className={styles.date}>{post.date}</p>
+            <p>{post.excerpt}</p>
+          </div>
+        ))}
       </main>
-      <Footer />
-    </>
+    </div>
   );
 }

@@ -1,0 +1,16 @@
+[
+  {
+    "slug": "the-day-i-died",
+    "title": "The day i died",
+    "date": "05-06-1225",
+    "excerpt": "My name is caleb and this is an extra testtesttest...",
+    "content": "My name is caleb and this is an extra testtesttest"
+  },
+  {
+    "slug": "3-things-i-learned-from-failing",
+    "title": "3 Things I Learned from Failing",
+    "date": "May 18, 2025",
+    "excerpt": "Failure hurts. But it also teaches. Here are three lessons I’ve learned the hard way...",
+    "content": "Failure hurts. But it also teaches. Here are three lessons I’ve learned the hard way:\n\n1. Always plan, but be ready to pivot.\n2. People matter more than pride.\n3. Failure isn’t the opposite of success — it’s part of it."
+  }
+]

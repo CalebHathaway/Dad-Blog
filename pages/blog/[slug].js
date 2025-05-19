@@ -1,45 +1,31 @@
-import React from 'react';
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
+import { useRouter } from 'next/router';
+import posts from '../../data/posts.json';
+import ReactMarkdown from 'react-markdown';
+import styles from '../../styles/Home.module.css';
 
-export async function getStaticPaths() {
-  const files = fs.readdirSync(path.join(process.cwd(), 'blogposts')).filter(file => file.endsWith('.md'));
+export default function BlogPost() {
+  const router = useRouter();
+  const { slug } = router.query;
 
+  const post = posts.find((p) => p.slug === slug);
 
-  const paths = files.map((filename) => ({
-    params: { slug: filename.replace('.md', '') },
-  }));
+  if (!post) return <p style={{ padding: '2rem' }}>Post not found.</p>;
 
-  return {
-    paths,
-    fallback: false,
-  };
-}
-
-export async function getStaticProps({ params: { slug } }) {
-  const markdownWithMeta = fs.readFileSync(
-    path.join(process.cwd(), 'blogposts', slug + '.md'),
-    'utf-8'
-  );
-
-  const { data: frontmatter, content } = matter(markdownWithMeta);
-
-  return {
-    props: {
-      frontmatter,
-      content,
-    },
-  };
-}
-
-// ✅ THIS is the missing piece!
-export default function BlogPostPage({ frontmatter, content }) {
   return (
-    <div>
-      <h1>{frontmatter.title}</h1>
-      <p>{frontmatter.date}</p>
-      <div>{content}</div>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1>{post.title}</h1>
+        <p className={styles.date}>{post.date}</p>
+      </header>
+
+      <main className={styles.main}>
+        <ReactMarkdown>{post.content}</ReactMarkdown>
+        <div style={{ marginTop: '3rem', borderTop: '1px solid #ddd', paddingTop: '1rem' }}>
+          <img src="/profile.jpg" alt="Steve Hathaway" style={{ width: 60, borderRadius: '50%' }} />
+          <p><strong>Steve Hathaway</strong></p>
+          <p style={{ fontStyle: 'italic' }}>“Decisions, Direction, and a Dash of Experience.”</p>
+        </div>
+      </main>
     </div>
   );
 }
